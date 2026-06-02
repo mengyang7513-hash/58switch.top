@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch 游戏选单</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #a29bfe;
+            --primary-dark: #5341d6;
+            --accent: #00cec9;
+            --accent-light: #81ecec;
+            --danger: #ff7675;
+            --danger-dark: #d63031;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --bg: #0a0a1a;
+            --bg-card: #141428;
+            --bg-card-hover: #1e1e3a;
+            --bg-input: #1a1a35;
+            --text: #e8e8f0;
+            --text-secondary: #8888aa;
+            --text-muted: #555577;
+            --border: #2a2a4a;
+            --border-light: #3a3a5a;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #2d1b69 50%, #1a0a3e 100%);
+            padding: 30px 20px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 50%, rgba(108,92,231,0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 50%, rgba(0,206,201,0.1) 0%, transparent 60%);
+            animation: headerGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes headerGlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-5%, 5%); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* ===== Stats Bar ===== */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 18px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: var(--bg-input);
+            border-radius: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .stat-value.warning {
+            color: var(--warning);
+        }
+
+        .stat-value.danger {
+            color: var(--danger);
+        }
+
+        .stat-unit {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .confirm-btn {
+            padding: 10px 28px;
+            background: linear-gradient(135deg, var(--success) 0%, #00a381 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,184,148,0.4);
+        }
+
+        .confirm-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .confirm-hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding-bottom: 12px;
+            background: var(--bg-card);
+        }
+
+        /* ===== Main Container ===== */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== Step Section ===== */
+        .step-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .step-title {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(108,92,231,0.15) 0%, rgba(0,206,201,0.05) 100%);
+            border-bottom: 1px solid var(--border);
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .step-body {
+            padding: 20px;
+        }
+
+        /* ===== Capacity Selection ===== */
+        .capacity-group {
+            margin-bottom: 20px;
+        }
+
+        .capacity-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .capacity-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .capacity-group-title .tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            background: rgba(108,92,231,0.2);
+            color: var(--primary-light);
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .capacity-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .capacity-option {
+            position: relative;
+        }
+
+        .capacity-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .capacity-option label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .capacity-option label:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-card-hover);
+            color: var(--text);
+        }
+
+        .capacity-option input:checked + label {
+            border-color: var(--primary);
+            background: rgba(108,92,231,0.15);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(108,92,231,0.2);
+        }
+
+        .capacity-option input:checked + label::before {
+            content: '✓';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            font-size: 11px;
+            color: #fff;
+        }
+
+        .notice-box {
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ===== Sort Dropdown ===== */
+        .sort-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .sort-select {
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.25s ease;
+            cursor: pointer;
+            min-width: 160px;
+        }
+
+        .sort-select:focus {
+            border-color: var(--primary);
+        }
+
+        .sort-select option {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        /* ===== Search ===== */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-btn, .clear-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .clear-btn {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .clear-btn:hover {
+            border-color: var(--text-muted);
+            color: var(--text);
+        }
+
+        /* ===== Game List ===== */
+        .game-list-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 200px 80px;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(108,92,231,0.08);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .game-list {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .game-list-body {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .game-list-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .game-list-body::-webkit-scrollbar-track {
+            background: var(--bg-card);
+        }
+
+        .game-list-body::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 3px;
+        }
+
+        .game-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 80px;
+            gap: 10px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .game-row:last-child {
+            border-bottom: none;
+        }
+
+        .game-row:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .game-row.selected {
+            background: rgba(108,92,231,0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Custom Checkbox */
+        .game-checkbox {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .game-checkbox input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .game-checkbox .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--bg-input);
+            border: 2px solid var(--border-light);
+            border-radius: 4px;
+            transition: all 0.25s ease;
+        }
+
+        .game-checkbox input:checked ~ .checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .game-checkbox input:checked ~ .checkmark::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 6px;
+            height: 11px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .game-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .game-lang-tag {
+            display: inline-block;
+            padding: 1px 6px;
+            background: rgba(0,206,201,0.15);
+            color: var(--accent);
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .game-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .game-info .version {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .game-info .genre {
+            color: var(--primary-light);
+        }
+
+        .game-size {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: right;
+        }
+
+        .game-size span {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .modal-code {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            word-break: break-all;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-btn.secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ===== Capacity Bar ===== */
+        .capacity-bar-container {
+            margin-top: 12px;
+        }
+
+        .capacity-bar {
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .capacity-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s ease, background 0.4s ease;
+            background: linear-gradient(90deg, var(--success) 0%, var(--accent) 100%);
+        }
+
+        .capacity-bar-fill.warning {
+            background: linear-gradient(90deg, var(--warning) 0%, #f39c12 100%);
+        }
+
+        .capacity-bar-fill.danger {
+            background: linear-gradient(90deg, var(--danger) 0%, var(--danger-dark) 100%);
+        }
+
+        .capacity-bar-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .stats-bar {
+                gap: 10px;
+                padding: 12px 15px;
+            }
+
+            .stat-item {
+                padding: 6px 12px;
+            }
+
+            .stat-value {
+                font-size: 15px;
+            }
+
+            .game-list-header,
+            .game-row {
+                grid-template-columns: 40px 1fr 70px;
+            }
+
+            .game-info {
+                display: none;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .capacity-options {
+                gap: 8px;
+            }
+
+            .capacity-option label {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+
+            .step-body {
+                padding: 14px;
+            }
+
+            .game-list-header,
+            .game-row {
+                grid-template-columns: 36px 1fr 60px;
+                gap: 6px;
+                padding: 10px 12px;
+            }
+
+            .game-name {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>🎮 Switch 游戏选单</h1>
+            <p class="subtitle">请选择您喜欢的游戏，确认提交后复制内容给客服</p>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-label">已选容量</span>
+            <span class="stat-value" id="usedCapacity">0</span>
+            <span class="stat-unit">GB</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">剩余容量</span>
+            <span class="stat-value" id="remainCapacity">0</span>
+            <span class="stat-unit">GB</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">已选游戏</span>
+            <span class="stat-value" id="selectedCount">0</span>
+            <span class="stat-unit">款</span>
+        </div>
+        <button class="confirm-btn" id="confirmBtn" onclick="showConfirmModal()" disabled>✓ 确定提交</button>
+    </div>
+    <div class="confirm-hint">【提交后，复制内容给客服】</div>
+
+    <!-- Main Content -->
+    <div class="container">
+
+        <!-- Step 1: Capacity Selection -->
+        <div class="step-section">
+            <div class="step-title">
+                <span class="step-badge">1</span>
+                选择机型和内存卡容量
+            </div>
+            <div class="step-body">
+                <!-- 机型选择 -->
+                <div class="capacity-group">
+                    <div class="capacity-group-title">
+                        选择机型
+                    </div>
+                    <div class="capacity-options">
+                        <div class="capacity-option">
+                            <input type="radio" name="model" id="model-standard" value="standard" data-reserve="30" onchange="onModelChange()">
+                            <label for="model-standard">NS 标准/续航版</label>
+                        </div>
+                        <div class="capacity-option">
+                            <input type="radio" name="model" id="model-lite" value="lite" data-reserve="30" onchange="onModelChange()">
+                            <label for="model-lite">NS Lite版</label>
+                        </div>
+                        <div class="capacity-option">
+                            <input type="radio" name="model" id="model-oled" value="oled" data-reserve="60" onchange="onModelChange()">
+                            <label for="model-oled">NS OLED版</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 容量选择 -->
+                <div class="capacity-group">
+                    <div class="capacity-group-title">
+                        选择容量
+                        <span class="tag" id="reserveTag">请先选择机型</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div class="capacity-options" style="margin:0;">
+                            <div class="capacity-option">
+                                <input type="radio" name="capacity" id="cap-128" value="128" onchange="onCapacityPreset(128)" disabled>
+                                <label for="cap-128">128GB</label>
+                            </div>
+                            <div class="capacity-option">
+                                <input type="radio" name="capacity" id="cap-256" value="256" onchange="onCapacityPreset(256)" disabled>
+                                <label for="cap-256">256GB</label>
+                            </div>
+                            <div class="capacity-option">
+                                <input type="radio" name="capacity" id="cap-512" value="512" onchange="onCapacityPreset(512)" disabled>
+                                <label for="cap-512">512GB</label>
+                            </div>
+                        </div>
+                        <input type="number" id="customCapacityInput" min="1" max="9999" placeholder="自备内存卡容量" disabled
+                            oninput="onCapacityCustom()"
+                            style="padding:10px 14px; background:var(--bg-input); border:2px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-size:15px; font-weight:600; width:150px; outline:none; transition:border-color 0.25s ease;"
+                            onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+                        <span style="font-size:15px; font-weight:600; color:var(--text-secondary);">GB</span>
+                    </div>
+                </div>
+
+                <!-- Notice -->
+                <div class="notice-box">
+                    ⚠️ 内存卡可用容量比实际小，页面剩余容量是扣除了创建双系统所需容量！<br><br>
+                    选游戏的时候可放心选满会尽量安排好，线上下单：按照订单和用户需求安装好如有漏装联系客服协商赔付，线下到店：免费安装5个超出一元一个。<br><br>
+                    自备内存卡已经在游戏机上使用过请在游戏机查看 设置 → 数据管理 输入实际容量。
+                </div>
+
+                <!-- Capacity Bar -->
+                <div class="capacity-bar-container" id="capacityBarContainer" style="display:none;">
+                    <div class="capacity-bar">
+                        <div class="capacity-bar-fill" id="capacityBarFill" style="width: 0%"></div>
+                    </div>
+                    <div class="capacity-bar-text">
+                        <span id="barUsedText">已用 0 GB</span>
+                        <span id="barRemainingText">剩余 0 GB</span>
+                        <span id="barTotalText">总可用 0 GB</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Game Selection -->
+        <div class="step-section">
+            <div class="step-title">
+                <span class="step-badge">2</span>
+                请选择游戏
+                <span style="font-size:12px; color:var(--text-muted); font-weight:400; margin-left:auto;">[ 多选 ]</span>
+            </div>
+            <div class="step-body">
+                <!-- Sort -->
+                <div class="sort-bar" style="margin-bottom:12px;">
+                    <select class="sort-select" id="sortSelect" onchange="sortGames()">
+                        <option value="popular">热门排序</option>
+                        <option value="name" selected>名称排序</option>
+                        <option value="random">随机推荐</option>
+                    </select>
+                </div>
+
+                <!-- Search -->
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchInput" placeholder="请输入游戏名搜索..." oninput="filterGames()">
+                    <button class="search-btn" onclick="filterGames()">🔍 搜索</button>
+                    <button class="clear-btn" onclick="clearSearch()">✕ 清除</button>
+                </div>
+
+                <!-- Game List -->
+                <div class="game-list">
+                    <div class="game-list-header" style="grid-template-columns: 50px 1fr 80px;">
+                        <div>选择</div>
+                        <div>游戏名称</div>
+                        <div style="text-align:right;">容量</div>
+                    </div>
+                    <div class="game-list-body" id="gameListBody">
+                        <!-- Games will be rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h2>📋 提交确认</h2>
+            <p style="color:var(--text-secondary); font-size:14px; margin-bottom:15px;">
+                请点击复制黏贴给客服：
+            </p>
+            <div class="modal-code" id="modalCode"></div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal()">关闭</button>
+                <button class="modal-btn primary" onclick="copyCode()">复制</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Over Capacity Modal -->
+    <div class="modal-overlay" id="overCapacityModal">
+        <div class="modal">
+            <h2 style="color:var(--danger);">⚠️ 容量超出警告</h2>
+            <div class="modal-code" id="overCapacityInfo" style="border-color:rgba(255,118,117,0.3);"></div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="continueOverSelection()">我知道了，继续选择</button>
+                <button class="modal-btn primary" onclick="cancelOverSelection()" style="background:var(--danger);">取消超出选择</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Game Data =====
+        const games = [
+    { id: 1, name: "001：1-2-switch", size: 3.35 },
+    { id: 2, name: "002：EA FC 26", size: 35.33 },
+    { id: 3, name: "003：NBA 2k26", size: 60.52 },
+    { id: 4, name: "004：Jump全明星大乱斗", size: 11.35 },
+    { id: 5, name: "005：Jojo的奇妙冒险 群星之战", size: 3.95 },
+    { id: 6, name: "006：暗黑破坏神3", size: 21.88 },
+    { id: 7, name: "007：奥日与黑暗森林 决定版", size: 3.5 },
+    { id: 8, name: "008：奥日2 精灵与萤火意志", size: 4.33 },
+    { id: 9, name: "009：八方旅人0", size: 5.28 },
+    { id: 10, name: "010：八方旅人1", size: 3.09 },
+    { id: 11, name: "011：八方旅人2", size: 6.08 },
+    { id: 12, name: "012：宝可梦 let\'s go 皮卡丘", size: 4.19 },
+    { id: 13, name: "013：宝可梦 阿尔宙斯", size: 6.1 },
+    { id: 14, name: "014：宝可梦 大侦探皮卡丘", size: 9.0 },
+    { id: 15, name: "015：宝可梦 剑", size: 12.4 },
+    { id: 16, name: "016：宝可梦 紫", size: 11.15 },
+    { id: 17, name: "017：宝可梦传说ZA", size: 6.0 },
+    { id: 18, name: "018：宝可梦咖啡馆", size: 0.33 },
+    { id: 19, name: "019：宝可梦随拍乐", size: 7.31 },
+    { id: 20, name: "020：宝可梦探险寻宝", size: 0.26 },
+    { id: 21, name: "021：宝可梦铁拳锦标赛", size: 3.96 },
+    { id: 22, name: "022：宝可梦钻石", size: 6.85 },
+    { id: 23, name: "023：碧姬公主 表演时刻", size: 4.65 },
+    { id: 24, name: "024：波斯王子 失落的王冠", size: 7.97 },
+    { id: 25, name: "025：茶杯头", size: 5.11 },
+    { id: 26, name: "026：超级机器人大战Y", size: 13.35 },
+    { id: 27, name: "027：超级鸡马", size: 2.22 },
+    { id: 28, name: "028：超级马里奥 奥德赛", size: 5.6 },
+    { id: 29, name: "029：超级马里奥 纸片千年之门", size: 5.11 },
+    { id: 30, name: "030：超级马里奥3D世界 酷霸王之怒", size: 2.87 },
+    { id: 31, name: "031：超级马里奥rpg", size: 6.52 },
+    { id: 32, name: "032：超级马里奥vs.咚奇刚", size: 1.3 },
+    { id: 33, name: "033：超级马里奥高尔夫 冲冲冲", size: 4.17 },
+    { id: 34, name: "034：超级马里奥和索尼克在东京奥运会", size: 6.4 },
+    { id: 35, name: "035：超级马里奥派对 超级巨星", size: 2.85 },
+    { id: 36, name: "036：超级马里奥派对 空前盛会", size: 5.32 },
+    { id: 37, name: "037：超级马里奥赛车8 豪华版", size: 11.24 },
+    { id: 38, name: "038：超级马里奥网球", size: 2.42 },
+    { id: 39, name: "039：超级马里奥兄弟u", size: 3.72 },
+    { id: 40, name: "040：超级马里奥兄弟 惊奇", size: 3.56 },
+    { id: 41, name: "041：超级马里奥与疯狂兔子 王国之战", size: 4.43 },
+    { id: 42, name: "042：超级马里奥与路易吉rgp 兄弟齐航", size: 9.85 },
+    { id: 43, name: "043：超级马里奥制造2", size: 3.05 },
+    { id: 44, name: "044：超级马力欧派对", size: 2.8 },
+    { id: 45, name: "045：超级马力欧银河1+2", size: 6.46 },
+    { id: 46, name: "046：超级舞动 瓦力欧制造", size: 1.31 },
+    { id: 47, name: "047：吃豆人", size: 3.54 },
+    { id: 48, name: "048：成年人的脑力锻炼", size: 1.86 },
+    { id: 49, name: "049：城市 天际线", size: 2.19 },
+    { id: 50, name: "050：超级炸弹人R2", size: 5.1 },
+    { id: 51, name: "051：刺客信条 艾吉奥", size: 35.31 },
+    { id: 52, name: "052：大富翁11", size: 3.62 },
+    { id: 53, name: "053：大航海时代4", size: 1.41 },
+    { id: 54, name: "054：大金刚 热带寒流", size: 7.44 },
+    { id: 55, name: "055：担架拍挡", size: 1.85 },
+    { id: 56, name: "056：地下城4", size: 5.36 },
+    { id: 57, name: "057：刀剑神域 彼岸游境", size: 14.89 },
+    { id: 58, name: "058：捣蛋鹅", size: 1.13 },
+    { id: 59, name: "059：地铁 归来2033", size: 6.29 },
+    { id: 60, name: "060：地下城与勇士 决斗", size: 7.98 },
+    { id: 61, name: "061：迪士尼魔法城堡2", size: 6.34 },
+    { id: 62, name: "062：钓鱼之星 世界之旅", size: 2.64 },
+    { id: 63, name: "063：东方夜雀食堂", size: 2.08 },
+    { id: 64, name: "064：咚奇刚 归来", size: 8.31 },
+    { id: 65, name: "065：动物迷城 回到黎明", size: 2.44 },
+    { id: 66, name: "066：哆啦a梦 大雄的新恐龙", size: 3.2 },
+    { id: 67, name: "067：哆啦a梦牧场物语", size: 2.97 },
+    { id: 68, name: "068：俄罗斯方块", size: 1.64 },
+    { id: 69, name: "069：分手装修", size: 2.58 },
+    { id: 70, name: "070：疯狂兔子 奇遇派对", size: 3.0 },
+    { id: 71, name: "071：符文工房5", size: 5.96 },
+    { id: 72, name: "072：高达破坏者4", size: 8.09 },
+    { id: 73, name: "073：孤岛危机3 复刻版", size: 11.02 },
+    { id: 74, name: "074：怪物猎人 崛起 曙光", size: 19.8 },
+    { id: 75, name: "075：怪物猎人物语2 破灭之翼", size: 14.68 },
+    { id: 76, name: "076：鬼谷八荒", size: 1.68 },
+    { id: 77, name: "077：鬼灭之刃 成为最强队士", size: 3.4 },
+    { id: 78, name: "078：鬼灭之刃 火神血风谭", size: 11.07 },
+    { id: 79, name: "079：鬼泣3", size: 5.06 },
+    { id: 80, name: "080：哈迪斯", size: 5.76 },
+    { id: 81, name: "081：哈迪斯2", size: 6.57 },
+    { id: 82, name: "082：海绵宝宝 大闹蟹堡王", size: 0.73 },
+    { id: 83, name: "083：海贼王无尽世界r豪华版", size: 10.45 },
+    { id: 84, name: "084：海贼无双4", size: 13.58 },
+    { id: 85, name: "085：合金弹头合集", size: 6.75 },
+    { id: 86, name: "086：胡闹搬家2 培训日", size: 1.69 },
+    { id: 87, name: "087：胡闹厨房 全都好吃", size: 15.52 },
+    { id: 88, name: "088：胡闹厨房2", size: 5.67 },
+    { id: 89, name: "089：幻想水浒传", size: 7.15 },
+    { id: 90, name: "090：荒野大镖客 救赎", size: 11.6 },
+    { id: 91, name: "091：魂斗罗 周年纪念典藏", size: 1.02 },
+    { id: 92, name: "092：火焰纹章 风花雪月", size: 12.59 },
+    { id: 93, name: "093：火焰之纹章 无双", size: 19.31 },
+    { id: 94, name: "094：火影忍者 终极风暴羁绊", size: 13.07 },
+    { id: 95, name: "095：霍格沃茨之遗", size: 14.88 },
+    { id: 96, name: "096：极品飞车14 热力追踪", size: 8.14 },
+    { id: 97, name: "097：集合啦 动物森友会", size: 11.07 },
+    { id: 98, name: "098：假面骑士 巅峰乱斗", size: 2.79 },
+    { id: 99, name: "099：健身环大冒险", size: 3.31 },
+    { id: 100, name: "100：健身拳击3 你的私人教练", size: 2.75 },
+    { id: 101, name: "101：饥荒 单机版", size: 2.28 },
+    { id: 102, name: "102：进击的巨人2", size: 20.58 },
+    { id: 103, name: "103：九张羊皮纸", size: 2.6 },
+    { id: 104, name: "104：救猫物语", size: 1.07 },
+    { id: 105, name: "105：狙击精英4", size: 9.01 },
+    { id: 106, name: "106：凯蒂猫的岛屿冒险", size: 3.98 },
+    { id: 107, name: "107：空洞骑士", size: 5.29 },
+    { id: 108, name: "108：空洞骑士 丝之歌", size: 2.79 },
+    { id: 109, name: "109：空之轨迹 the 1st", size: 9.73 },
+    { id: 110, name: "110：蜡笔小新 煤炭镇的小白", size: 3.09 },
+    { id: 111, name: "111：蜡笔小新 我与博士的暑假", size: 1.53 },
+    { id: 112, name: "112：乐高 地平线大冒险", size: 7.18 },
+    { id: 113, name: "113：雷曼传奇", size: 2.94 },
+    { id: 114, name: "114：莉蒂和丝尔的炼金工房", size: 19.13 },
+    { id: 115, name: "115：猎天使魔女3", size: 15.91 },
+    { id: 116, name: "116：灵魂旅者", size: 8.35 },
+    { id: 117, name: "117：灵活脑学校", size: 0.69 },
+    { id: 118, name: "118：零 濡鸦之巫女", size: 18.51 },
+    { id: 119, name: "119：路易吉鬼屋3", size: 7.71 },
+    { id: 120, name: "120：洛克人", size: 2.19 },
+    { id: 121, name: "121：猫咪斗恶龙1 2", size: 1.86 },
+    { id: 122, name: "122：猫咪斗恶龙3", size: 1.04 },
+    { id: 123, name: "123：毛线小精灵2", size: 2.75 },
+    { id: 124, name: "124：美女请别影响我成仙", size: 14.0 },
+    { id: 125, name: "125：萌猫公园2", size: 0.25 },
+    { id: 126, name: "126：密特罗德 银河战士", size: 4.27 },
+    { id: 127, name: "127：喵斯快跑", size: 3.48 },
+    { id: 128, name: "128：咩咩启示录", size: 1.86 },
+    { id: 129, name: "129：牧场物语 来吧！风之繁华集市", size: 3.17 },
+    { id: 130, name: "130：尼尔 自动人形", size: 10.91 },
+    { id: 131, name: "131：你裁我剪", size: 1.82 },
+    { id: 132, name: "132：逆转裁判123 成步堂精选集", size: 2.23 },
+    { id: 133, name: "133：逆转裁判456 王泥喜精选集", size: 13.09 },
+    { id: 134, name: "134：逆转裁判编年史", size: 3.95 },
+    { id: 135, name: "135：逆转检察官1 2 御剑精选集", size: 7.34 },
+    { id: 136, name: "136：怒之铁拳4", size: 3.9 },
+    { id: 137, name: "137：女鬼桥2 释魂路", size: 5.86 },
+    { id: 138, name: "138：女神异闻录5 皇家版", size: 12.81 },
+    { id: 139, name: "139：啪嗒砰1 2 重制版", size: 1.47 },
+    { id: 140, name: "140：喷射战士3", size: 13.59 },
+    { id: 141, name: "141：皮克敏3", size: 6.53 },
+    { id: 142, name: "142：皮克敏4", size: 10.48 },
+    { id: 143, name: "143：七龙珠 电光炸裂", size: 6.74 },
+    { id: 144, name: "144：七龙珠z 卡卡罗特 新觉醒篇", size: 27.06 },
+    { id: 145, name: "145：棋弈无限 中国象棋", size: 1.01 },
+    { id: 146, name: "146：前进吧！奇诺比奥队长", size: 1.89 },
+    { id: 147, name: "147：潜水员戴夫", size: 4.9 },
+    { id: 148, name: "148：蔷薇与椿 豪华绚烂版", size: 1.73 },
+    { id: 149, name: "149：拳皇13 全球对决", size: 2.98 },
+    { id: 150, name: "150：拳皇合集", size: 1.05 },
+    { id: 151, name: "151：人类一败涂地", size: 2.09 },
+    { id: 152, name: "152：人中之龙 极", size: 22.94 },
+    { id: 153, name: "153：忍者神龟 变种解放", size: 4.49 },
+    { id: 154, name: "154：任天堂 运动", size: 3.24 },
+    { id: 155, name: "155：任天堂明星大乱斗", size: 17.31 },
+    { id: 156, name: "156：塞尔达 海拉鲁全明星", size: 12.65 },
+    { id: 157, name: "157：塞尔达 王国之泪", size: 16.3 },
+    { id: 158, name: "158：塞尔达 御天之剑", size: 7.11 },
+    { id: 159, name: "159：塞尔达传说 旷野之息", size: 15.71 },
+    { id: 160, name: "160：塞尔达传说 织梦岛", size: 5.88 },
+    { id: 161, name: "161：塞尔达传说 智慧的再现", size: 5.58 },
+    { id: 162, name: "162：塞尔达无双 灾厄启示录", size: 12.48 },
+    { id: 163, name: "163：三国志14 威力加强版", size: 13.02 },
+    { id: 164, name: "164：三国志8 重制版", size: 12.41 },
+    { id: 165, name: "165：三角战略", size: 7.03 },
+    { id: 166, name: "166：三丽鸥全明星 魔法捉迷藏", size: 0.98 },
+    { id: 167, name: "167：三位一体5 发条阴谋", size: 4.64 },
+    { id: 168, name: "168：杀戮尖塔", size: 0.52 },
+    { id: 169, name: "169：沙滩排球 绯红", size: 10.31 },
+    { id: 170, name: "170：闪电十一人胜利之路", size: 28.7 },
+    { id: 171, name: "171：上古卷轴5 天际公开版", size: 22.2 },
+    { id: 172, name: "172：上海麻将纸牌", size: 0.31 },
+    { id: 173, name: "173：神臂斗士", size: 3.23 },
+    { id: 174, name: "174：神界原罪2 豪华决定版", size: 11.3 },
+    { id: 175, name: "175：神之天平", size: 1.58 },
+    { id: 176, name: "176：生化危机 启示录2", size: 23.65 },
+    { id: 177, name: "177：圣兽之王", size: 3.29 },
+    { id: 178, name: "178：师傅", size: 10.26 },
+    { id: 179, name: "179：十三机兵防卫圈", size: 5.84 },
+    { id: 180, name: "180：世界游戏51", size: 2.32 },
+    { id: 181, name: "181：侍魂 晓", size: 15.85 },
+    { id: 182, name: "182：数码宝贝世界 新秩序", size: 6.61 },
+    { id: 183, name: "183：双点校园", size: 4.45 },
+    { id: 184, name: "184：双点医院", size: 3.81 },
+    { id: 185, name: "185：双人成行", size: 12.13 },
+    { id: 186, name: "186：死亡细胞", size: 2.39 },
+    { id: 187, name: "187：随动回旋镖", size: 0.63 },
+    { id: 188, name: "188：索尼克 未知边境", size: 15.28 },
+    { id: 189, name: "189：太阁立志传v", size: 3.61 },
+    { id: 190, name: "190：太鼓达人 咚咚雷音祭", size: 3.88 },
+    { id: 191, name: "191：天穗之咲稻姬", size: 6.37 },
+    { id: 192, name: "192：跳绳挑战", size: 0.15 },
+    { id: 193, name: "193：土豆兄弟", size: 0.31 },
+    { id: 194, name: "194：汪汪喵喵 动物医院", size: 1.86 },
+    { id: 195, name: "195：王牌钓手 欢钓水族馆", size: 7.18 },
+    { id: 196, name: "196：文明6", size: 25.73 },
+    { id: 197, name: "197：我的世界", size: 5.18 },
+    { id: 198, name: "198：我的世界 传奇", size: 7.34 },
+    { id: 199, name: "199：我的舞蹈教室", size: 1.86 },
+    { id: 200, name: "200：巫师3", size: 38.25 },
+    { id: 201, name: "201：无人深空", size: 5.69 },
+    { id: 202, name: "202：吾家健身趣 4分钟锻炼全身", size: 1.73 },
+    { id: 203, name: "203：舞力全开 亚洲版", size: 20.34 },
+    { id: 204, name: "204：侠盗猎车手 GTA3", size: 16.99 },
+    { id: 205, name: "205：项圈×恶意", size: 5.1 },
+    { id: 206, name: "206：像素咖啡店", size: 0.48 },
+    { id: 207, name: "207：消逝的光芒", size: 16.49 },
+    { id: 208, name: "208：小丑牌", size: 0.14 },
+    { id: 209, name: "209：小骨英雄杀手", size: 3.67 },
+    { id: 210, name: "210：小小梦魇", size: 3.05 },
+    { id: 211, name: "211：小小梦魇2", size: 6.56 },
+    { id: 212, name: "212：小小梦魇3", size: 9.48 },
+    { id: 213, name: "213：新弹丸论破3", size: 7.48 },
+    { id: 214, name: "214：星露谷物语", size: 1.51 },
+    { id: 215, name: "215：星之卡比 斗士2", size: 1.11 },
+    { id: 216, name: "216：星之卡比 美食节", size: 1.19 },
+    { id: 217, name: "217：星之卡比 探索发现", size: 5.75 },
+    { id: 218, name: "218：星之卡比 新星同盟", size: 3.94 },
+    { id: 219, name: "219：星之卡比wii 重返梦幻岛", size: 7.44 },
+    { id: 220, name: "220：轩辕剑 7", size: 9.46 },
+    { id: 221, name: "221：雪人兄弟 仙境", size: 7.44 },
+    { id: 222, name: "222：盐与献祭", size: 1.23 },
+    { id: 223, name: "223：异界锁链", size: 9.82 },
+    { id: 224, name: "224：耀西的手工世界", size: 5.6 },
+    { id: 225, name: "225：伊苏10", size: 6.43 },
+    { id: 226, name: "226：异度神剑x 终极版", size: 13.86 },
+    { id: 227, name: "227：异度之刃 决定版", size: 13.71 },
+    { id: 228, name: "228：异度之刃3", size: 18.75 },
+    { id: 229, name: "229：英雄传说 黎之轨迹 2 绯红原罪", size: 12.69 },
+    { id: 230, name: "230：勇者斗恶龙11s", size: 13.96 },
+    { id: 231, name: "231：勇者斗恶龙 创世小玩家1", size: 0.77 },
+    { id: 232, name: "232：勇者斗恶龙 创世小玩家2", size: 1.98 },
+    { id: 233, name: "233：勇者斗恶龙 1 2重制版", size: 8.24 },
+    { id: 234, name: "234：勇者斗恶龙3 重制版", size: 6.95 },
+    { id: 235, name: "235：勇者斗恶龙7 重制版", size: 4.33 },
+    { id: 236, name: "236：战场女武神4", size: 10.7 },
+    { id: 237, name: "237：真女神转生5 复仇", size: 13.74 },
+    { id: 238, name: "238：真三国无双8", size: 14.22 },
+    { id: 239, name: "239：植物大战僵尸 和睦小镇保卫战", size: 6.41 },
+    { id: 240, name: "240：植物大战僵尸 重植版", size: 2.81 },
+    { id: 241, name: "241：只只大冒险", size: 7.44 },
+    { id: 242, name: "242：中国式家长", size: 0.91 },
+    { id: 243, name: "243：最终幻想 世界", size: 10.78 },
+    { id: 244, name: "244：最终幻想7核心危机 再融合", size: 14.38 },
+    { id: 245, name: "245：尊巴燃起来", size: 6.68 },
+    { id: 246, name: "246：朋友收集梦想生活", size: 6.28 },
+    { id: 247, name: "247：博德之门：黑暗联盟", size: 3.9 },
+    { id: 248, name: "248：超级兔子人", size: 1.14 },
+    { id: 249, name: "249：蛋仔派对", size: 5.63 },
+    { id: 250, name: "250：鬼灭之刃：火之神血风谭2", size: 17.86 },
+    { id: 251, name: "251：人狼村之谜", size: 0.98 },
+    { id: 252, name: "252：圣女战旗", size: 3.11 },
+    { id: 253, name: "253：失忆症 世界", size: 7.44 },
+    { id: 254, name: "254：完蛋!我被美女包围了2", size: 8.92 },
+    { id: 255, name: "255：最终幻想战略版：伊瓦利斯编年史", size: 7.14 },
+    { id: 256, name: "256：银河战士：究极4", size: 26.34 },
+    { id: 257, name: "257：幽灵诡计", size: 2.73 },
+    { id: 258, name: "258：战律2", size: 1.23 },
+    { id: 259, name: "259：卡比猎人队", size: 1.09 },
+    { id: 260, name: "260：火焰纹章 ENGAGE", size: 16.57 },
+    { id: 261, name: "261：模范悖论", size: 7.44 }
+];
+
+        // ===== State =====
+        let selectedGames = new Set();
+        let totalCapacityGB = 0;
+        let reservedGB = 30;
+
+        // ===== Render =====
+        function renderGames(filteredGames) {
+            const container = document.getElementById('gameListBody');
+            if (filteredGames.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔍</div>
+                        <p>没有找到匹配的游戏</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filteredGames.map(game => `
+                <div class="game-row ${selectedGames.has(game.id) ? 'selected' : ''}" id="row-${game.id}">
+                    <div>
+                        <label class="game-checkbox">
+                            <input type="checkbox" ${selectedGames.has(game.id) ? 'checked' : ''} onchange="toggleGame(${game.id})">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <div class="game-name" style="font-size: 13px;">
+                        ${game.name.replace(/^\d+：/, '')}
+                    </div>
+                    <div class="game-size">
+                        ${game.size.toFixed(2)}<span> GB</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== Game Toggle =====
+        function toggleGame(id) {
+            const isSelecting = !selectedGames.has(id);
+            if (isSelecting) {
+                selectedGames.add(id);
+            } else {
+                selectedGames.delete(id);
+            }
+            updateStats();
+
+            // 立刻更新当前行视觉（蓝色勾立刻出现）
+            const row = document.getElementById('row-' + id);
+            const checkbox = row ? row.querySelector('input[type="checkbox"]') : null;
+            if (row) {
+                row.classList.toggle('selected', isSelecting);
+                if (checkbox) checkbox.checked = isSelecting;
+            }
+
+            // 延迟重新渲染，让人看到"已选择"的蓝色勾后再置顶
+            clearTimeout(window._pinTimeout);
+            window._pinTimeout = setTimeout(() => {
+                const searchVal = document.getElementById('searchInput').value.trim();
+                if (searchVal) {
+                    filterGames();
+                } else {
+                    sortGames();
+                }
+                // 置顶后，对刚操作的行加一个闪光提示
+                setTimeout(() => {
+                    const targetRow = document.getElementById('row-' + id);
+                    if (targetRow) {
+                        targetRow.style.transition = 'box-shadow 0.3s ease';
+                        targetRow.style.boxShadow = isSelecting
+                            ? '0 0 0 2px var(--primary), 0 0 12px rgba(108,92,231,0.4)'
+                            : 'none';
+                        setTimeout(() => {
+                            targetRow.style.boxShadow = 'none';
+                            setTimeout(() => {
+                                targetRow.style.transition = '';
+                            }, 300);
+                        }, 800);
+                    }
+                }, 50);
+            }, 1000);
+        }
+
+        // ===== Model Change =====
+        function onModelChange() {
+            const selectedModel = document.querySelector('input[name="model"]:checked');
+            if (selectedModel) {
+                reservedGB = parseInt(selectedModel.getAttribute('data-reserve')) || 30;
+                document.getElementById('reserveTag').textContent = `已预留 ${reservedGB}G 制作新系统`;
+                // Enable capacity options and custom input
+                document.querySelectorAll('input[name="capacity"]').forEach(input => {
+                    input.disabled = false;
+                });
+                document.getElementById('customCapacityInput').disabled = false;
+            } else {
+                document.getElementById('reserveTag').textContent = '请先选择机型';
+            }
+            updateStats();
+        }
+
+        // ===== Capacity Preset (radio buttons) =====
+        function onCapacityPreset(val) {
+            totalCapacityGB = val;
+            // Clear custom input
+            document.getElementById('customCapacityInput').value = '';
+            updateStats();
+            document.getElementById('capacityBarContainer').style.display = 'block';
+        }
+
+        // ===== Capacity Custom Input =====
+        function onCapacityCustom() {
+            const val = parseInt(document.getElementById('customCapacityInput').value);
+            if (!val || val <= 0) {
+                totalCapacityGB = 0;
+            } else {
+                totalCapacityGB = val;
+                // Deselect preset radios
+                document.querySelectorAll('input[name="capacity"]').forEach(r => r.checked = false);
+            }
+            updateStats();
+            document.getElementById('capacityBarContainer').style.display = totalCapacityGB > 0 ? 'block' : 'none';
+        }
+
+        // ===== Capacity Change (legacy alias) =====
+        function onCapacityChange() {
+            onCapacityCustom();
+        }
+
+        // ===== Update Stats =====
+        function updateStats() {
+            let usedGB = 0;
+            selectedGames.forEach(id => {
+                const game = games.find(g => g.id === id);
+                if (game) usedGB += game.size;
+            });
+
+            const availableGB = Math.max(0, totalCapacityGB - reservedGB);
+            const remainGB = Math.max(0, availableGB - usedGB);
+            const isOverCapacity = totalCapacityGB > 0 && usedGB > availableGB;
+
+            document.getElementById('usedCapacity').textContent = usedGB.toFixed(1);
+            document.getElementById('remainCapacity').textContent = totalCapacityGB > 0 ? remainGB.toFixed(1) : '0';
+            document.getElementById('selectedCount').textContent = selectedGames.size;
+
+            // Color coding for remain capacity
+            const remainEl = document.getElementById('remainCapacity');
+            remainEl.className = 'stat-value';
+            if (totalCapacityGB > 0) {
+                if (isOverCapacity) {
+                    remainEl.classList.add('danger');
+                    remainEl.textContent = '-' + (usedGB - availableGB).toFixed(1);
+                } else {
+                    const ratio = remainGB / availableGB;
+                    if (ratio < 0.1) remainEl.classList.add('danger');
+                    else if (ratio < 0.3) remainEl.classList.add('warning');
+                }
+            }
+
+            // Capacity bar
+            if (totalCapacityGB > 0) {
+                const percent = Math.min(100, (usedGB / availableGB) * 100);
+                const bar = document.getElementById('capacityBarFill');
+                bar.style.width = percent + '%';
+                bar.className = 'capacity-bar-fill';
+                if (isOverCapacity) bar.classList.add('danger');
+                else if (percent > 90) bar.classList.add('danger');
+                else if (percent > 70) bar.classList.add('warning');
+
+                const barRemain = Math.max(0, availableGB - usedGB);
+                document.getElementById('barUsedText').textContent = `已用 ${usedGB.toFixed(1)} GB`;
+                document.getElementById('barRemainingText').textContent = `剩余 ${barRemain.toFixed(1)} GB`;
+                document.getElementById('barTotalText').textContent = `总可用 ${availableGB.toFixed(0)} GB（已预留 ${reservedGB}G 系统）`;
+            }
+
+            // Enable/disable confirm
+            document.getElementById('confirmBtn').disabled = selectedGames.size === 0;
+
+            // Over capacity warning
+            if (isOverCapacity) {
+                showOverCapacityWarning(usedGB, availableGB);
+            }
+        }
+
+        // ===== Over Capacity Warning =====
+        let suppressUntil = 0;
+
+        function showOverCapacityWarning(usedGB, availableGB) {
+            if (Date.now() < suppressUntil) return;
+            const overAmount = (usedGB - availableGB).toFixed(1);
+            document.getElementById('overCapacityInfo').textContent =
+                `已选游戏容量：${usedGB.toFixed(1)} GB\n总可用容量：${availableGB.toFixed(0)} GB（已预留 ${reservedGB}G 系统）\n已超出：${overAmount} GB\n\n请减少游戏或更换更大容量的内存卡！`;
+            document.getElementById('overCapacityModal').classList.add('active');
+        }
+
+        function closeOverCapacityModal() {
+            document.getElementById('overCapacityModal').classList.remove('active');
+        }
+
+        function continueOverSelection() {
+            document.getElementById('overCapacityModal').classList.remove('active');
+            suppressUntil = Date.now() + 5000;
+        }
+
+        function cancelOverSelection() {
+            document.getElementById('overCapacityModal').classList.remove('active');
+            // 从后往前取消选择，直到容量不超出
+            const selectedArr = Array.from(selectedGames);
+            let currentUsed = 0;
+            selectedGames.forEach(id => {
+                const game = games.find(g => g.id === id);
+                if (game) currentUsed += game.size;
+            });
+            const availableGB = Math.max(0, totalCapacityGB - reservedGB);
+            for (let i = selectedArr.length - 1; i >= 0; i--) {
+                if (currentUsed <= availableGB) break;
+                const game = games.find(g => g.id === selectedArr[i]);
+                if (game) {
+                    selectedGames.delete(selectedArr[i]);
+                    currentUsed -= game.size;
+                }
+            }
+            // 更新界面
+            sortGames();
+            updateStats();
+        }
+
+        // Close over capacity modal on overlay click
+        document.getElementById('overCapacityModal').addEventListener('click', function(e) {
+            if (e.target === this) closeOverCapacityModal();
+        });
+
+        // ===== Popular Games Data (placeholder - update with actual popular data) =====
+        const popularGameIds = [
+            28, 37, 97, 159, 157, 138, 74, 155, 200, 140,
+            36, 30, 119, 107, 80, 151, 217, 93, 214, 228
+        ];
+
+        // ===== Sort =====
+        let currentDisplayedGames = [...games];
+
+        function sortGames() {
+            const sortType = document.getElementById('sortSelect').value;
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            let list = keyword ? games.filter(g => g.name.toLowerCase().includes(keyword)) : [...games];
+
+            switch (sortType) {
+                case 'popular':
+                    list.sort((a, b) => {
+                        const aPop = popularGameIds.indexOf(a.id);
+                        const bPop = popularGameIds.indexOf(b.id);
+                        if (aPop !== -1 && bPop !== -1) return aPop - bPop;
+                        if (aPop !== -1) return -1;
+                        if (bPop !== -1) return 1;
+                        return a.id - b.id;
+                    });
+                    break;
+                case 'name':
+                    list.sort((a, b) => {
+                        const nameA = a.name.replace(/^\d+：/, '');
+                        const nameB = b.name.replace(/^\d+：/, '');
+                        return nameA.localeCompare(nameB, 'zh-CN');
+                    });
+                    break;
+                case 'random':
+                    for (let i = list.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [list[i], list[j]] = [list[j], list[i]];
+                    }
+                    break;
+            }
+
+            // 置顶：已选游戏排在最前面
+            if (selectedGames.size > 0) {
+                const selected = list.filter(g => selectedGames.has(g.id));
+                const unselected = list.filter(g => !selectedGames.has(g.id));
+                list = [...selected, ...unselected];
+            }
+
+            currentDisplayedGames = list;
+            renderGames(list);
+        }
+
+        // ===== Search =====
+        function filterGames() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!keyword) {
+                sortGames();
+                return;
+            }
+            const filtered = games.filter(g =>
+                g.name.toLowerCase().includes(keyword)
+            );
+            // Apply current sort to filtered results
+            const sortType = document.getElementById('sortSelect').value;
+            switch (sortType) {
+                case 'popular':
+                    filtered.sort((a, b) => {
+                        const aPop = popularGameIds.indexOf(a.id);
+                        const bPop = popularGameIds.indexOf(b.id);
+                        if (aPop !== -1 && bPop !== -1) return aPop - bPop;
+                        if (aPop !== -1) return -1;
+                        if (bPop !== -1) return 1;
+                        return a.id - b.id;
+                    });
+                    break;
+                case 'name':
+                    filtered.sort((a, b) => {
+                        const nameA = a.name.replace(/^\d+：/, '');
+                        const nameB = b.name.replace(/^\d+：/, '');
+                        return nameA.localeCompare(nameB, 'zh-CN');
+                    });
+                    break;
+                case 'random':
+                    for (let i = filtered.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+                    }
+                    break;
+            }
+
+            // 置顶：已选游戏排在最前面
+            if (selectedGames.size > 0) {
+                const selected = filtered.filter(g => selectedGames.has(g.id));
+                const unselected = filtered.filter(g => !selectedGames.has(g.id));
+                filtered.length = 0;
+                filtered.push(...selected, ...unselected);
+            }
+
+            currentDisplayedGames = filtered;
+            renderGames(filtered);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            sortGames();
+        }
+
+        // ===== Confirm Modal =====
+        function showConfirmModal() {
+            if (selectedGames.size === 0) return;
+
+            const selectedModel = document.querySelector('input[name="model"]:checked');
+            const modelLabel = selectedModel ? selectedModel.closest('.capacity-option').querySelector('label').textContent.trim() : '未选择';
+            const customVal = parseInt(document.getElementById('customCapacityInput').value);
+            const presetSelected = document.querySelector('input[name="capacity"]:checked');
+            const capacityLabel = customVal > 0 ? customVal + 'GB' : (presetSelected ? presetSelected.value + 'GB' : '未填写');
+
+            let usedGB = 0;
+            const gameIds = [];
+            selectedGames.forEach(id => {
+                const game = games.find(g => g.id === id);
+                if (game) {
+                    usedGB += game.size;
+                    // 只保留编号，去掉游戏名字
+                    const match = game.name.match(/^(\d+)/);
+                    if (match) {
+                        gameIds.push(match[1]);
+                    }
+                }
+            });
+
+            const code = `游戏机型号: ${modelLabel}\n内存卡容量: ${capacityLabel}\n已选游戏数：${selectedGames.size}\n已使用容量: ${(usedGB + reservedGB).toFixed(1)}GB\n已选游戏编号：${gameIds.join('，')}`;
+
+            document.getElementById('modalCode').textContent = code;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        function copyCode() {
+            const code = document.getElementById('modalCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ 已复制！';
+                btn.style.background = 'var(--success)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('已复制！');
+            });
+        }
+
+        // Close modal on overlay click
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ===== Init =====
+        sortGames();
+    </script>
+</body>
+</html>
