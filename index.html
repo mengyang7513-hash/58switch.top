@@ -19,9 +19,9 @@
             --bg-card: #141428;
             --bg-card-hover: #1e1e3a;
             --bg-input: #1a1a35;
-            --text: #e8e8f0;
-            --text-secondary: #8888aa;
-            --text-muted: #555577;
+            --text: #d8d8ee;
+            --text-secondary: #9898b8;
+            --text-muted: #6a6a88;
             --border: #2a2a4a;
             --border-light: #3a3a5a;
             --radius: 12px;
@@ -842,9 +842,10 @@
 
                 <!-- Notice -->
                 <div class="notice-box">
-                    ⚠️ 内存卡可用容量比实际小，页面剩余容量是扣除了创建双系统所需容量！<br><br>
+                    内存卡的"标称容量"和"实际可用容量"的差异问题根源是厂商用十进制（GB）、操作系统用二进制（GiB）计算，标称128 GB～实际115 GB，标称256GB～实际235GB，标称512 GB ～实际465GB，页面剩余容量是减去创建双系统所需容量，实际容量-虚拟系统容量=剩余容量！<br><br>
                     选游戏的时候可放心选满会尽量安排好，线上下单：按照订单和用户需求安装好如有漏装联系客服协商赔付，线下到店：免费安装5个超出一元一个。<br><br>
-                    自备内存卡已经在游戏机上使用过请在游戏机查看 设置 → 数据管理 输入实际容量。
+                    自备内存卡已经在游戏机上使用过请在游戏机查看 设置 → 数据管理 输入实际容量。<br><br>
+                    游戏下载推荐网址：<a href="http://58Switch.cn/" target="_blank" style="color:#7aa8ff;">http://58Switch.cn/</a>　备用网址：<a href="http://124.156.170.176/" target="_blank" style="color:#7aa8ff;">http://124.156.170.176/</a>
                 </div>
 
                 <!-- Capacity Bar -->
@@ -1292,8 +1293,14 @@
         }
 
         // ===== Capacity Preset (radio buttons) =====
+        // 标称容量 → 实际可用容量映射
+        function getActualCapacity(presetVal) {
+            const map = { 128: 115, 256: 235, 512: 465 };
+            return map[presetVal] || presetVal;
+        }
+
         function onCapacityPreset(val) {
-            totalCapacityGB = val;
+            totalCapacityGB = getActualCapacity(val);
             // Clear custom input
             document.getElementById('customCapacityInput').value = '';
             updateStats();
