@@ -1571,8 +1571,9 @@
 
         function copyCode() {
             const code = document.getElementById('modalCode').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                const btn = event.target;
+            const btn = document.querySelector('.modal-btn.primary');
+
+            function onSuccess() {
                 const originalText = btn.textContent;
                 btn.textContent = '✓ 已复制！';
                 btn.style.background = 'var(--success)';
@@ -1580,16 +1581,29 @@
                     btn.textContent = originalText;
                     btn.style.background = '';
                 }, 2000);
-            }).catch(() => {
-                // Fallback
-                const textarea = document.createElement('textarea');
-                textarea.value = code;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert('已复制！');
-            });
+            }
+
+            function fallbackCopy() {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = code;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    textarea.style.top = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    const ok = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    if (ok) onSuccess();
+                } catch (e) {}
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(onSuccess).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
         }
 
         // Close modal on overlay click
