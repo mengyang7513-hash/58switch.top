@@ -756,10 +756,6 @@
                         <div class="ico">📷</div>
                         <div><div class="lbl">扫码进店</div><div style="margin-top:8px;"><img src="images/taobao-qr.png" alt="淘宝店铺二维码" class="qr-clickable" onclick="openLightbox(this.src)" style="width:120px;border-radius:10px;border:1px solid var(--border);"></div></div>
                     </div>
-                    <div class="contact-row" style="padding:12px 14px;background:rgba(0,195,227,0.08);border-radius:10px;margin-top:4px;">
-                        <div class="ico" style="background:rgba(0,195,227,0.2);">🚚</div>
-                        <div><div class="lbl">邮寄说明</div><div style="font-size:0.85rem;color:var(--text2);margin-top:4px;">淘宝下单享<strong style="color:var(--blue);">顺丰</strong>包邮寄回<br>闲鱼、拼多多平台下单<strong style="color:var(--orange);">申通</strong>包邮寄回</div></div>
-                    </div>
                     <div class="contact-row" style="cursor:pointer;" onclick="copyMailAddress()">
                         <div class="ico">📋</div>
                         <div style="flex:1;">
@@ -768,16 +764,22 @@
                         </div>
                         <div style="color:var(--blue);font-size:0.85rem;white-space:nowrap;">复制</div>
                     </div>
+                    <div class="contact-row" style="padding:12px 14px;background:rgba(0,195,227,0.08);border-radius:10px;margin-top:4px;">
+                        <div class="ico" style="background:rgba(0,195,227,0.2);">🚚</div>
+                        <div><div class="lbl">邮寄说明</div><div style="font-size:0.85rem;color:var(--text2);margin-top:4px;">淘宝下单享<strong style="color:var(--blue);">顺丰</strong>包邮寄回<br>闲鱼、拼多多平台下单<strong style="color:var(--orange);">申通</strong>包邮寄回</div></div>
+                    </div>
                 </div>
                 <div class="contact-card">
                     <h3>📞 联系方式</h3>
-                    <div class="contact-row">
+                    <div class="contact-row" style="cursor:pointer;" onclick="copyPhone()">
                         <div class="ico">📱</div>
-                        <div><div class="lbl">客服手机</div><div class="val">131 6773 0518 (孟洋)</div></div>
+                        <div style="flex:1;"><div class="lbl">客服手机</div><div class="val">131 6773 0518 (孟洋)</div></div>
+                        <div style="color:var(--blue);font-size:0.85rem;white-space:nowrap;">复制</div>
                     </div>
-                    <div class="contact-row">
+                    <div class="contact-row" style="cursor:pointer;" onclick="copyWechat()">
                         <div class="ico">💬</div>
-                        <div><div class="lbl">客服微信</div><div class="val">haishangshuma9527</div></div>
+                        <div style="flex:1;"><div class="lbl">客服微信</div><div class="val">haishangshuma9527</div></div>
+                        <div style="color:var(--blue);font-size:0.85rem;white-space:nowrap;">复制</div>
                     </div>
                     <div class="contact-row" style="align-items:center;">
                         <div class="ico">📷</div>
@@ -896,6 +898,16 @@
         function copyOfflineAddress() {
             const text = '上海市松江区九亭镇沪松公路1399弄69号616室';
             copyToClipboard(text).then(() => showToast('线下地址已复制')).catch(() => showToast('复制失败，请手动复制'));
+        }
+
+        // === 复制客服手机 ===
+        function copyPhone() {
+            copyToClipboard('13167730518').then(() => showToast('手机号已复制')).catch(() => showToast('复制失败，请手动复制'));
+        }
+
+        // === 复制客服微信 ===
+        function copyWechat() {
+            copyToClipboard('haishangshuma9527').then(() => showToast('微信号已复制')).catch(() => showToast('复制失败，请手动复制'));
         }
 
         // === QR Lightbox ===
