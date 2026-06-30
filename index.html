@@ -794,6 +794,14 @@
                         </div>
                         <div style="color:var(--blue);font-size:0.85rem;white-space:nowrap;">复制</div>
                     </div>
+                    <div class="contact-row" style="cursor:pointer;" onclick="copyOfflineAddress()">
+                        <div class="ico">📍</div>
+                        <div style="flex:1;">
+                            <div class="lbl">线下地址 <span style="font-size:0.75rem;color:var(--text3);">(点击复制)</span></div>
+                            <div class="val" style="font-size:0.85rem;margin-top:6px;">上海市松江区九亭镇沪松公路1399弄69号616室</div>
+                        </div>
+                        <div style="color:var(--blue);font-size:0.85rem;white-space:nowrap;">复制</div>
+                    </div>
                     <div class="contact-row">
                         <div class="ico">🚇</div>
                         <div><div class="lbl">交通方式</div><div class="val">地铁 9 号线九亭站 2 号口出 100 米</div></div>
@@ -855,10 +863,39 @@
             grid.appendChild(el);
         });
 
+        // === 通用复制函数（兼容所有浏览器） ===
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+            return new Promise((resolve, reject) => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.top = '-9999px';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    resolve();
+                } catch (e) {
+                    reject(e);
+                }
+                document.body.removeChild(ta);
+            });
+        }
+
         // === 复制邮寄地址 ===
         function copyMailAddress() {
             const text = '姓名：孟洋\n电话：13167730518\n地址：上海市松江区九亭镇沪松公路1399弄69号616室';
-            navigator.clipboard.writeText(text).then(() => showToast('收件信息已复制'));
+            copyToClipboard(text).then(() => showToast('收件信息已复制')).catch(() => showToast('复制失败，请手动复制'));
+        }
+
+        // === 复制线下地址 ===
+        function copyOfflineAddress() {
+            const text = '上海市松江区九亭镇沪松公路1399弄69号616室';
+            copyToClipboard(text).then(() => showToast('线下地址已复制')).catch(() => showToast('复制失败，请手动复制'));
         }
 
         // === QR Lightbox ===
@@ -885,7 +922,7 @@
             item.addEventListener('contextmenu', e => {
                 e.preventDefault();
                 const code = item.querySelector('.res-code').textContent.replace('提取码: ', '');
-                navigator.clipboard.writeText(code).then(() => showToast(`提取码 ${code} 已复制`));
+                copyToClipboard(code).then(() => showToast(`提取码 ${code} 已复制`));
             });
         });
     </script>
